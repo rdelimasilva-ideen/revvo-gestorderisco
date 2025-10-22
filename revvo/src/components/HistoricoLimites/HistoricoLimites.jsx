@@ -43,6 +43,96 @@ const HistoricoLimites = () => {
       usagePercentage: 85,
       trend: 'up',
       trendValue: 15
+    },
+    {
+      id: 4,
+      name: 'Laboratório Vida Diagnóstica',
+      document: '22.333.444/0001-55',
+      totalLimit: 400000,
+      usedLimit: 180000,
+      usagePercentage: 45,
+      trend: 'up',
+      trendValue: 5
+    },
+    {
+      id: 5,
+      name: 'Clínica Odontológica Sorrir',
+      document: '33.444.555/0001-66',
+      totalLimit: 150000,
+      usedLimit: 127500,
+      usagePercentage: 85,
+      trend: 'up',
+      trendValue: 20
+    },
+    {
+      id: 6,
+      name: 'Hospital Materno Infantil',
+      document: '44.555.666/0001-77',
+      totalLimit: 900000,
+      usedLimit: 450000,
+      usagePercentage: 50,
+      trend: 'down',
+      trendValue: 10
+    },
+    {
+      id: 7,
+      name: 'Centro de Reabilitação Viver',
+      document: '55.666.777/0001-88',
+      totalLimit: 300000,
+      usedLimit: 75000,
+      usagePercentage: 25,
+      trend: 'down',
+      trendValue: 15
+    },
+    {
+      id: 8,
+      name: 'Policlínica Central',
+      document: '66.777.888/0001-99',
+      totalLimit: 600000,
+      usedLimit: 540000,
+      usagePercentage: 90,
+      trend: 'up',
+      trendValue: 25
+    },
+    {
+      id: 9,
+      name: 'Clínica de Imagens MedScan',
+      document: '77.888.999/0001-00',
+      totalLimit: 350000,
+      usedLimit: 210000,
+      usagePercentage: 60,
+      trend: 'up',
+      trendValue: 8
+    },
+    {
+      id: 10,
+      name: 'Hospital Oncológico Esperança',
+      document: '88.999.000/0001-11',
+      totalLimit: 1200000,
+      usedLimit: 360000,
+      usagePercentage: 30,
+      trend: 'down',
+      trendValue: 5
+    },
+    {
+      id: 11,
+      name: 'Farmácia e Drogaria São José',
+      document: '99.000.111/0001-22',
+      totalLimit: 200000,
+      usedLimit: 160000,
+      usagePercentage: 80,
+      trend: 'up',
+      trendValue: 18
+    },
+    {
+      id: 12,
+      name: 'Clínica de Fisioterapia Movimento',
+      document: '00.111.222/0001-33',
+      totalLimit: 180000,
+      usedLimit: 54000,
+      usagePercentage: 30,
+      trend: 'down',
+      trendValue: 12
     }
   ];
 
@@ -77,6 +167,56 @@ const HistoricoLimites = () => {
       reason: 'Expansão Operacional',
       status: 'Aprovação Final',
       timeInAnalysis: '3 dias'
+    },
+    {
+      id: 4,
+      name: 'Laboratório LabMais',
+      document: '11.222.333/0001-99',
+      currentLimit: 250000,
+      requestedLimit: 400000,
+      reason: 'Nova Unidade',
+      status: 'Em Análise',
+      timeInAnalysis: '7 dias'
+    },
+    {
+      id: 5,
+      name: 'Clínica Cardiológica Coração Forte',
+      document: '22.333.444/0001-88',
+      currentLimit: 500000,
+      requestedLimit: 750000,
+      reason: 'Crescimento de Demanda',
+      status: 'Em Análise',
+      timeInAnalysis: '2 dias'
+    },
+    {
+      id: 6,
+      name: 'Hospital Veterinário PetCare',
+      document: '33.444.555/0001-77',
+      currentLimit: 150000,
+      requestedLimit: 100000,
+      reason: 'Redução Voluntária',
+      status: 'Aprovação Final',
+      timeInAnalysis: '1 dia'
+    },
+    {
+      id: 7,
+      name: 'Centro de Tratamento Intensivo',
+      document: '44.555.666/0001-66',
+      currentLimit: 800000,
+      requestedLimit: 1200000,
+      reason: 'Ampliação de Leitos',
+      status: 'Pendente Documentação',
+      timeInAnalysis: '15 dias'
+    },
+    {
+      id: 8,
+      name: 'Farmácia Medicamentos Especiais',
+      document: '55.666.777/0001-55',
+      currentLimit: 180000,
+      requestedLimit: 280000,
+      reason: 'Novos Convênios',
+      status: 'Em Análise',
+      timeInAnalysis: '4 dias'
     }
   ];
 
@@ -126,6 +266,111 @@ const HistoricoLimites = () => {
       analyst: 'Maria Oliveira',
       newRequestAllowed: true,
       waitingPeriod: '15 dias'
+    },
+    {
+      id: 4,
+      name: 'Clínica de Estética Beleza Total',
+      document: '88.999.000/0001-44',
+      requestedLimit: 250000,
+      rejectionReason: {
+        primary: 'Tempo de Operação Insuficiente',
+        details: 'Empresa com menos de 12 meses de funcionamento',
+        severity: 'medium'
+      },
+      analysisDate: '18/12/2024',
+      analyst: 'Pedro Almeida',
+      newRequestAllowed: true,
+      waitingPeriod: '90 dias'
+    },
+    {
+      id: 5,
+      name: 'Laboratório Análises Rápidas',
+      document: '99.000.111/0001-55',
+      requestedLimit: 500000,
+      rejectionReason: {
+        primary: 'Restrições Financeiras',
+        details: 'Patrimônio líquido incompatível com o limite solicitado',
+        severity: 'high'
+      },
+      analysisDate: '12/12/2024',
+      analyst: 'Juliana Costa',
+      newRequestAllowed: true,
+      waitingPeriod: '45 dias'
+    },
+    {
+      id: 6,
+      name: 'Consultório Odontológico Dental Saúde',
+      document: '00.111.222/0001-66',
+      requestedLimit: 180000,
+      rejectionReason: {
+        primary: 'Faturamento Insuficiente',
+        details: 'Faturamento médio mensal abaixo do necessário',
+        severity: 'medium'
+      },
+      analysisDate: '05/12/2024',
+      analyst: 'Roberto Fernandes',
+      newRequestAllowed: true,
+      waitingPeriod: '30 dias'
+    },
+    {
+      id: 7,
+      name: 'Centro Radiológico Imagem Perfeita',
+      document: '11.222.333/0001-77',
+      requestedLimit: 450000,
+      rejectionReason: {
+        primary: 'Processos Judiciais Pendentes',
+        details: 'Existem processos trabalhistas em andamento',
+        severity: 'high'
+      },
+      analysisDate: '20/12/2024',
+      analyst: 'Ana Silva',
+      newRequestAllowed: false,
+      waitingPeriod: 'Após resolução judicial'
+    },
+    {
+      id: 8,
+      name: 'Clínica Neurológica NeuroCare',
+      document: '22.333.444/0001-88',
+      requestedLimit: 350000,
+      rejectionReason: {
+        primary: 'Concentração de Risco',
+        details: 'Cliente já possui limite elevado em outras linhas de crédito',
+        severity: 'medium'
+      },
+      analysisDate: '03/12/2024',
+      analyst: 'Carlos Santos',
+      newRequestAllowed: true,
+      waitingPeriod: '60 dias'
+    },
+    {
+      id: 9,
+      name: 'Hospital Dia Cirurgia Rápida',
+      document: '33.444.555/0001-99',
+      requestedLimit: 700000,
+      rejectionReason: {
+        primary: 'Alteração Societária Recente',
+        details: 'Mudança de sócios nos últimos 6 meses',
+        severity: 'low'
+      },
+      analysisDate: '01/12/2024',
+      analyst: 'Maria Oliveira',
+      newRequestAllowed: true,
+      waitingPeriod: '20 dias'
+    },
+    {
+      id: 10,
+      name: 'Farmácia de Manipulação Fórmula Certa',
+      document: '44.555.666/0001-00',
+      requestedLimit: 220000,
+      rejectionReason: {
+        primary: 'Dados Cadastrais Desatualizados',
+        details: 'Informações cadastrais com mais de 2 anos sem atualização',
+        severity: 'low'
+      },
+      analysisDate: '28/11/2024',
+      analyst: 'Pedro Almeida',
+      newRequestAllowed: true,
+      waitingPeriod: '10 dias'
     }
   ];
 
