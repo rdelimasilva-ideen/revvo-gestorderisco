@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as UI from '../UI/MotorDeRegrasUI';
 import { Plus, Pencil, Trash2, Play, Pause, Copy } from 'lucide-react';
+import RuleModal from './RuleModal';
 
 const MotorDeRegras = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -13,7 +14,7 @@ const MotorDeRegras = () => {
   });
 
   // Mock data para regras
-  const rulesData = [
+  const [rulesData, setRulesData] = useState([
     {
       id: 1,
       nome: 'Limite Automático por Score',
@@ -279,7 +280,7 @@ const MotorDeRegras = () => {
       ultima_execucao: '2024-10-22 05:00',
       execucoes: 15
     }
-  ];
+  ]);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -295,22 +296,38 @@ const MotorDeRegras = () => {
     setIsModalOpen(true);
   };
 
+  const handleSaveRule = (ruleData) => {
+    if (selectedRule) {
+      // Editar regra existente
+      setRulesData(prev => prev.map(r => r.id === ruleData.id ? ruleData : r));
+    } else {
+      // Adicionar nova regra
+      setRulesData(prev => [...prev, ruleData]);
+    }
+  };
+
   const handleDeleteRule = (ruleId) => {
     if (confirm('Tem certeza que deseja excluir esta regra?')) {
-      console.log('Deletando regra:', ruleId);
-      // Implementar lógica de deleção
+      setRulesData(prev => prev.filter(r => r.id !== ruleId));
     }
   };
 
   const handleToggleStatus = (ruleId, currentStatus) => {
     const newStatus = currentStatus === 'ativa' ? 'inativa' : 'ativa';
-    console.log('Alterando status da regra:', ruleId, 'para:', newStatus);
-    // Implementar lógica de alteração de status
+    setRulesData(prev => prev.map(r =>
+      r.id === ruleId ? { ...r, status: newStatus } : r
+    ));
   };
 
   const handleDuplicateRule = (rule) => {
-    console.log('Duplicando regra:', rule.id);
-    // Implementar lógica de duplicação
+    const newRule = {
+      ...rule,
+      id: Date.now(),
+      nome: `${rule.nome} (Cópia)`,
+      ultima_execucao: '-',
+      execucoes: 0
+    };
+    setRulesData(prev => [...prev, newRule]);
   };
 
   // Filtrar regras
@@ -487,6 +504,16 @@ const MotorDeRegras = () => {
           <p>Nenhuma regra encontrada com os filtros selecionados.</p>
         </UI.EmptyState>
       )}
+
+      <RuleModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRule(null);
+        }}
+        rule={selectedRule}
+        onSave={handleSaveRule}
+      />
     </UI.Container>
   );
 };
