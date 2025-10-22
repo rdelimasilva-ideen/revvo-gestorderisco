@@ -2,92 +2,155 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
 import { FunnelSimple, CaretDown, CaretUp, Clock, CheckCircle } from '@phosphor-icons/react';
-import { getSession } from '../../services/sessionService';
 import RequestDetails from './RequestDetails';
 import NewLimitOrder from './NewLimitOrder';
-import { getCreditLimitRequests } from '../../services/creditLimitService';
-import { getCurrentUserProfile } from '../../services/userProfileService';
 import * as UI from '../UI/MySolicitationsUI'
 
+// Mock data para solicitações
+const mockRequests = [
+  {
+    id: 1,
+    customer: {
+      company_code: '001',
+      name: 'Hospital Santa Casa'
+    },
+    credit_limit_amt: 500000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-15T10:30:00'
+  },
+  {
+    id: 2,
+    customer: {
+      company_code: '002',
+      name: 'Clínica Bella Vita'
+    },
+    credit_limit_amt: 250000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-18T14:20:00'
+  },
+  {
+    id: 3,
+    customer: {
+      company_code: '003',
+      name: 'Instituto Médico São Paulo'
+    },
+    credit_limit_amt: 750000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-20T09:15:00'
+  },
+  {
+    id: 4,
+    customer: {
+      company_code: '004',
+      name: 'Laboratório Vida Diagnóstica'
+    },
+    credit_limit_amt: 400000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-10-10T11:45:00'
+  },
+  {
+    id: 5,
+    customer: {
+      company_code: '005',
+      name: 'Clínica Odontológica Sorrir'
+    },
+    credit_limit_amt: 150000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-10-08T16:30:00'
+  },
+  {
+    id: 6,
+    customer: {
+      company_code: '006',
+      name: 'Hospital Materno Infantil'
+    },
+    credit_limit_amt: 900000,
+    status_id: 4,
+    status: { name: 'Rejeitado' },
+    created_at: '2024-10-12T13:00:00'
+  },
+  {
+    id: 7,
+    customer: {
+      company_code: '007',
+      name: 'Centro de Reabilitação Viver'
+    },
+    credit_limit_amt: 300000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-19T08:45:00'
+  },
+  {
+    id: 8,
+    customer: {
+      company_code: '008',
+      name: 'Policlínica Central'
+    },
+    credit_limit_amt: 600000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-21T15:20:00'
+  },
+  {
+    id: 9,
+    customer: {
+      company_code: '009',
+      name: 'Clínica de Imagens MedScan'
+    },
+    credit_limit_amt: 350000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-10-05T10:00:00'
+  },
+  {
+    id: 10,
+    customer: {
+      company_code: '010',
+      name: 'Hospital Oncológico Esperança'
+    },
+    credit_limit_amt: 1200000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-17T12:30:00'
+  }
+];
+
 const MySolicitations = () => {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState(mockRequests);
+  const [loading, setLoading] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showPending, setShowPending] = useState(true);
   const [showCompleted, setShowCompleted] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
-  const [userCompanyId, setUserCompanyId] = useState(null); // Alterado de userId para userCompanyId
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Buscar o company_id do usuário logado
+  // Aplicar filtros aos dados mock
   useEffect(() => {
-    async function getUserCompanyId() {
-      try {
-        // Obter a sessão atual do usuário
-        const { data: { session }, error } = await getSession();
+    let filtered = [...mockRequests];
 
-        if (!session?.user?.id) {
-          console.error('Usuário não autenticado');
-          return;
-        }
-
-        // Buscar o perfil do usuário para obter a company_id associada
-        const userProfile = await getCurrentUserProfile(session.user.id);
-        
-        if (!userProfile?.company_id) {
-          console.error('Company_id não encontrado no perfil do usuário');
-          return;
-        }
-
-        setUserCompanyId(userProfile.company_id);
-      } catch (error) {
-        console.error('Erro ao obter company_id do usuário:', error);
-      }
+    // Filtro por status
+    if (filterStatus) {
+      filtered = filtered.filter(r => r.status_id === parseInt(filterStatus));
     }
 
-    getUserCompanyId();
-  }, []);
-
-  // Função para buscar solicitações
-  const fetchRequests = async () => {
-    if (!userCompanyId) return;
-    try {
-      setLoading(true);
-      const data = await getCreditLimitRequests({
-        companyId: userCompanyId,
-        statusId: filterStatus,
-        startDate: filterStartDate,
-        endDate: filterEndDate
-      });
-      setRequests(data);
-    } catch (error) {
-      console.error('Erro ao buscar solicitações:', error);
-    } finally {
-      setLoading(false);
+    // Filtro por data
+    if (filterStartDate) {
+      filtered = filtered.filter(r => new Date(r.created_at) >= new Date(filterStartDate));
     }
-  };
-  
-  // Buscar solicitações quando os filtros ou company ID mudar
-  useEffect(() => {
-    fetchRequests();
-  }, [userCompanyId, filterStatus, filterStartDate, filterEndDate]);
-  
-  // Ouvir evento para atualizar a lista após exclusão
-  useEffect(() => {
-    const handleRefresh = () => {
-      fetchRequests();
-    };
-    
-    window.addEventListener('refreshMyRequests', handleRefresh);
-    
-    // Limpeza do event listener quando o componente for desmontado
-    return () => {
-      window.removeEventListener('refreshMyRequests', handleRefresh);
-    };
-  }, [userCompanyId, filterStatus, filterStartDate, filterEndDate]);
+    if (filterEndDate) {
+      filtered = filtered.filter(r => new Date(r.created_at) <= new Date(filterEndDate));
+    }
+
+    setRequests(filtered);
+  }, [filterStatus, filterStartDate, filterEndDate]);
 
   const handleRequestClick = (request) => {
     setSelectedRequest(request);
@@ -125,19 +188,6 @@ const MySolicitations = () => {
         onClose={() => setSelectedRequest(null)}
         onEdit={handleEditRequest}
       />
-    );
-  }
-
-  if (loading) {
-    return (
-      <UI.Container>
-        <UI.Header>
-          <h2 className="text-2xl font-semibold">Minhas Solicitações de Limite</h2>
-        </UI.Header>
-        <div className="text-center text-gray-500 mt-8">
-          Carregando solicitações...
-        </div>
-      </UI.Container>
     );
   }
 
