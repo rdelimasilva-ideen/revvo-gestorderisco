@@ -1,0 +1,7 @@
+/mta_archives/
+/node_modules/
+/resources/
+node_modules
+.env
+/tmp/
+.DS_Store

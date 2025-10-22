@@ -1,0 +1,80 @@
+_schema-version: "3.2"
+ID: gestor_risco_limite
+version: 0.0.1
+modules:
+- name: gestor_risco_limite-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: gestor_risco_limite-destination-service
+    parameters:
+      content-target: true
+  - name: gestor_risco_limite_html_repo_host
+    parameters:
+      service-key:
+        name: gestor_risco_limite_html_repo_host-key
+  - name: uaa_gestor_risco_limite
+    parameters:
+      service-key:
+        name: uaa_gestor_risco_limite-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: ideen_gestor_risco_limite_html_repo_host
+          ServiceInstanceName: gestor_risco_limite-html5-app-host-service
+          ServiceKeyName: gestor_risco_limite_html_repo_host-key
+          sap.cloud.service: ideen
+        - Authentication: OAuth2UserTokenExchange
+          Name: ideen_uaa_gestor_risco_limite
+          ServiceInstanceName: gestor_risco_limite-xsuaa-service
+          ServiceKeyName: uaa_gestor_risco_limite-key
+          sap.cloud.service: ideen
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: gestor_risco_limite_ui_deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: gestor_risco_limite_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - revvo-content.zip
+      name: revvo
+      target-path: resources/
+- name: revvo
+  type: html5
+  path: revvo
+  build-parameters:
+    builder: custom
+    commands:
+    - npm install
+    - npm run build
+    supported-platforms: []
+resources:
+- name: gestor_risco_limite-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: gestor_risco_limite-destination-service
+    service-plan: lite
+- name: gestor_risco_limite_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: gestor_risco_limite-html5-app-host-service
+    service-plan: app-host
+- name: uaa_gestor_risco_limite
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: gestor_risco_limite-xsuaa-service
+    service-plan: application

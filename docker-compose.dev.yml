@@ -1,0 +1,57 @@
+# Arquivo de override para desenvolvimento
+# Use com: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+services:
+  backend:
+    build:
+      context: ./sap-connector
+      dockerfile: Dockerfile
+    container_name: gestor-risco-backend-service
+    volumes:
+      # Montar código fonte para desenvolvimento
+      - ./sap-connector:/app
+      # Excluir node_modules e cache do Python
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      # Modo desenvolvimento
+      ENVIRONMENT: development
+      LOG_LEVEL: DEBUG
+    command: >
+      sh -c "
+        echo 'Development mode - watching for changes...' &&
+        echo 'Installing development dependencies...' &&
+        pip install watchdog &&
+        echo 'Starting backend with auto-reload...' &&
+        python -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  frontend:
+    container_name: gestor-risco-frontend-dev
+    build:
+      context: ./revvo
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"  # Porta do Vite dev server
+    environment:
+      VITE_API_URL: http://localhost/api
+      NODE_ENV: development
+    networks:
+      - gestor-risco-network
+
+  # Nginx proxy para desenvolvimento
+  nginx-dev:
+    image: nginx:alpine
+    container_name: gestor-risco-nginx-dev
+    ports:
+      - "3000:80"
+    volumes:
+      - ./revvo/nginx.dev.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - gestor-risco-network
+
+networks:
+  gestor-risco-network:
+    driver: bridge

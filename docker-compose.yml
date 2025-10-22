@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: gestor-risco-postgres
+    environment:
+      POSTGRES_DB: sap_connector
+      POSTGRES_USER: sap_user
+      POSTGRES_PASSWORD: sap_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gestor-risco-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sap_user -d sap_connector -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Backend (sap-connector)
+  backend:
+    build:
+      context: ./sap-connector
+      dockerfile: Dockerfile
+    container_name: gestor-risco-backend-service
+    env_file:
+      - .env
+    environment:
+      # Database
+      DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+      SUPABASE_DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+      
+      # Supabase (configure these with your actual values)
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      
+      # SAP Configuration (configure these with your actual values)
+      SAP_BASE_URL: ${SAP_BASE_URL:-}
+      SAP_OAUTH_URL: ${SAP_OAUTH_URL:-}
+      SAP_CLIENT_ID: ${SAP_CLIENT_ID:-}
+      SAP_CLIENT_SECRET: ${SAP_CLIENT_SECRET:-}
+      
+      # Google OAuth (configure these with your actual values)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      
+      # JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-your-secret-key-change-in-production}
+      
+      # CORS
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:80,http://localhost:8081
+      
+      # Environment
+      ENVIRONMENT: local
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gestor-risco-network
+    volumes:
+      - ./sap-connector:/app
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health/live')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Frontend (revvo)
+  frontend:
+    build:
+      context: ./revvo
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8081/backend
+    container_name: gestor-risco-frontend
+    # Não expor porta diretamente, o NGINX fará isso
+    # ports:
+    #   - "8081:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - gestor-risco-network
+    environment:
+      VITE_API_URL: http://localhost:8081/backend
+    volumes:
+      - frontend-content:/usr/share/nginx/html
+
+  # Removendo o serviço NGINX adicional, usaremos apenas o frontend com NGINX
+  # Nginx proxy
+  nginx:
+    image: nginx:alpine
+    container_name: gestor-risco-nginx
+    ports:
+      - "8081:80"
+    volumes:
+      - ./revvo/dist:/usr/share/nginx/html
+      - ./revvo/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    networks:
+      - gestor-risco-network
+
+volumes:
+  postgres_data:
+  frontend-content:
+
+networks:
+  gestor-risco-network:
+    driver: bridge

@@ -1,0 +1,38 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+
+---
+# ServiceAccount para Backend (Workload Identity)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gestor-risco-backend-sa
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-backend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    iam.gke.io/gcp-service-account: sa-revvo-app-hml@ideen-revvo-hml-01.iam.gserviceaccount.com
+
+---
+# ServiceAccount para Frontend (Workload Identity)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gestor-risco-frontend-sa
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-frontend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    iam.gke.io/gcp-service-account: sa-revvo-app-hml@ideen-revvo-hml-01.iam.gserviceaccount.com

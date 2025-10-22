@@ -1,0 +1,89 @@
+---
+# Ingress - Frontend
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gestor-risco-frontend-ingress
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "ip-revvo-gestor-risco-hml-01"
+    networking.gke.io/managed-certificates: "gestor-risco-managed-cert"
+    networking.gke.io/v1beta1.FrontendConfig: "http-to-https"
+spec:
+  rules:
+    - host: gestor-risco.revvobr.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gestor-risco-frontend-service
+                port:
+                  number: 80
+
+---
+# Ingress - Backend (API)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gestor-risco-backend-ingress
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name:  "ip-revvo-gestor-risco-backend-hml-01"
+    networking.gke.io/managed-certificates: "gestor-risco-managed-cert"
+    networking.gke.io/v1beta1.FrontendConfig: "http-to-https"
+spec:
+  rules:
+    - host: api.gestor-risco.revvobr.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gestor-risco-backend-service
+                port:
+                  number: 80
+
+---
+# Managed Certificate
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: gestor-risco-managed-cert
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  domains:
+    - gestor-risco.revvobr.com.br
+    - api.gestor-risco.revvobr.com.br
+
+---
+# FrontendConfig para redirecionar HTTP -> HTTPS
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: http-to-https
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT

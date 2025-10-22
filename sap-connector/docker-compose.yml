@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sap_postgres
+    environment:
+      POSTGRES_DB: sap_connector
+      POSTGRES_USER: sap_user
+      POSTGRES_PASSWORD: sap_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sap_user -d sap_connector"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: sap_api
+    environment:
+      DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+      SAP_BASE_URL: ${SAP_BASE_URL}
+      SAP_OAUTH_URL: ${SAP_OAUTH_URL}
+      SAP_CLIENT_ID: ${SAP_CLIENT_ID}
+      SAP_CLIENT_SECRET: ${SAP_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ENVIRONMENT: local
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python server.py
+    volumes:
+      - ./src:/app/src
+
+  worker_customers:
+    build: .
+    container_name: sap_worker_customers
+    environment:
+      DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+      SAP_BASE_URL: ${SAP_BASE_URL}
+      SAP_OAUTH_URL: ${SAP_OAUTH_URL}
+      SAP_CLIENT_ID: ${SAP_CLIENT_ID}
+      SAP_CLIENT_SECRET: ${SAP_CLIENT_SECRET}
+      ENVIRONMENT: local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python -m src.workers.customer_worker
+    volumes:
+      - ./src:/app/src
+#
+#  worker_sales:
+#    build: .
+#    container_name: sap_worker_sales
+#    environment:
+#      DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+#      SAP_BASE_URL: ${SAP_BASE_URL}
+#      SAP_OAUTH_URL: ${SAP_OAUTH_URL}
+#      SAP_CLIENT_ID: ${SAP_CLIENT_ID}
+#      SAP_CLIENT_SECRET: ${SAP_CLIENT_SECRET}
+#      ENVIRONMENT: local
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    command: python -m src.workers.sales_worker
+#    volumes:
+#      - ./src:/app/src
+#
+#  worker_credit:
+#    build: .
+#    container_name: sap_worker_credit
+#    environment:
+#      DATABASE_URL: postgresql://sap_user:sap_password@postgres:5432/sap_connector
+#      SAP_BASE_URL: ${SAP_BASE_URL}
+#      SAP_OAUTH_URL: ${SAP_OAUTH_URL}
+#      SAP_CLIENT_ID: ${SAP_CLIENT_ID}
+#      SAP_CLIENT_SECRET: ${SAP_CLIENT_SECRET}
+#      ENVIRONMENT: local
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    command: python -m src.workers.credit_worker
+#    volumes:
+#      - ./src:/app/src
+
+volumes:
+  postgres_data:

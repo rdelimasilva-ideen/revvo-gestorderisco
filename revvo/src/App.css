@@ -1,0 +1,26 @@
+.logo {
+  height: 32px;
+  padding: 6px;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.card h2 {
+  margin: 8px 0 16px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.card h3 {
+  color: var(--secondary-text);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--secondary-text);
+}

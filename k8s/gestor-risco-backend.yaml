@@ -1,0 +1,154 @@
+---
+# ConfigMap para Backend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gestor-risco-backend-config
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-backend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+data:
+  LOG_LEVEL: "INFO"
+  PYTHON_ENV: "development"
+  DB_HOST: "10.195.0.3"
+  DB_PORT: "5432"
+  DB_NAME: "db_gestor_risco"
+  REDIS_HOST: "10.195.1.3"
+  REDIS_PORT: "6379"
+  JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseSerialGC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestor-risco-backend
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-backend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gestor-risco-backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gestor-risco-backend
+        app.kubernetes.io/version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "false"
+        prometheus.io/path: "/health/live"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: gestor-risco-backend-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+      - name: gestor-risco-backend
+        image: "${ARTIFACT_REGISTRY}gestor-risco-backend/revvo-gestor-risco:${IMAGE_TAG}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gestor-risco-backend-config
+        - secretRef:
+            name: gestor-risco-backend-secrets
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
+      terminationGracePeriodSeconds: 60
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-type
+                operator: In
+                values:
+                - "spot"
+          - weight: 50
+            preference:
+              matchExpressions:
+              - key: spot
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - key: "cloud.google.com/gke-spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: gestor-risco-backend-service
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-backend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: gestor-risco-backend
+
+---
+# PodDisruptionBudget para Backend
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gestor-risco-backend-pdb
+  namespace: ns-gestor-risco
+  labels:
+    app.kubernetes.io/name: gestor-risco-backend
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gestor-risco-backend

@@ -1,0 +1,200 @@
+name: Deploy to GKE
+on:
+  push:
+    branches: [main, develop]
+
+env:
+  PROJECT_ID: ${{ vars.PROJECT_ID }}
+  CLUSTER_NAME: ${{ vars.GCP_CLUSTER_NAME }}
+  CLUSTER_ZONE: ${{ vars.GCP_CLUSTER_ZONE }}
+  ARTIFACT_REGISTRY: ${{ vars.ARTIFACT_REGISTRY_URL }}
+  BUILD_IMAGES: ${{ vars.BUILD_IMAGES }}
+  DEPLOYMENT_NAME: gestor-risco
+  IMAGE: revvo-gestor-risco
+  NAMESPACE: ns-gestor-risco
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'homologacao' }}
+
+    steps:
+    # =============================================================================
+    # STEP 1: PREPARAÇÃO DO AMBIENTE
+    # =============================================================================
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup gcloud
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        install_components: gke-gcloud-auth-plugin
+
+    - name: Authenticate
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.SA_DEPLOY_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
+
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.CLUSTER_NAME }}
+        location: ${{ env.CLUSTER_ZONE }}
+        use_auth_provider: true
+
+    - name: Configure cluster authentication
+      run: |
+        gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} \
+          --zone ${{ env.CLUSTER_ZONE }} \
+          --project ${{ env.PROJECT_ID }}
+
+    # =============================================================================
+    # STEP 2: CONFIGURAÇÃO DINÂMICA
+    # =============================================================================
+    - name: Set deployment configuration
+      id: config
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "namespace=${{ env.NAMESPACE }}" >> $GITHUB_OUTPUT
+          echo "environment=production" >> $GITHUB_OUTPUT
+          echo "frontend_url=https://revvo.tech" >> $GITHUB_OUTPUT
+          echo "backend_url=https://revvo.tech/backend" >> $GITHUB_OUTPUT
+        else
+          echo "namespace=${{ env.NAMESPACE }}" >> $GITHUB_OUTPUT
+          echo "environment=homologacao" >> $GITHUB_OUTPUT
+          echo "frontend_url=https://gestor-risco.revvobr.com.br" >> $GITHUB_OUTPUT
+          echo "backend_url=https://api.gestor-risco.revvobr.com.br" >> $GITHUB_OUTPUT
+        fi
+
+    # =============================================================================
+    # STEP 3: CONSTRUÇÃO E PUBLICAÇÃO DA IMAGEM
+    # =============================================================================
+    - name: Build and push frontend image
+      if:  env.BUILD_IMAGES == '1'
+      run: |
+        docker build \
+          --build-arg VITE_API_URL=${{ steps.config.outputs.backend_url }} \
+          --build-arg VITE_DEBUG_MODE=${{ github.ref == 'refs/heads/main' && 'false' || 'true' }} \
+          --build-arg VITE_API_TIMEOUT=30000 \
+          -t ${{ env.ARTIFACT_REGISTRY }}gestor-risco-frontend/${{ env.IMAGE }}:${{ github.sha }} \
+          ./revvo
+        docker push ${{ env.ARTIFACT_REGISTRY }}gestor-risco-frontend/${{ env.IMAGE }}:${{ github.sha }}
+        # Also tag and push as latest
+        docker tag ${{ env.ARTIFACT_REGISTRY }}gestor-risco-frontend/${{ env.IMAGE }}:${{ github.sha }} ${{ env.ARTIFACT_REGISTRY }}gestor-risco-frontend/${{ env.IMAGE }}:latest
+        docker push ${{ env.ARTIFACT_REGISTRY }}gestor-risco-frontend/${{ env.IMAGE }}:latest
+
+    - name: Build and push backend image
+      if:  env.BUILD_IMAGES == '1'
+      run: |
+        docker build -t ${{ env.ARTIFACT_REGISTRY }}gestor-risco-backend/${{ env.IMAGE }}:${{ github.sha }} ./sap-connector/.
+        docker push ${{ env.ARTIFACT_REGISTRY }}gestor-risco-backend/${{ env.IMAGE }}:${{ github.sha }}
+        # Also tag and push as latest
+        docker tag ${{ env.ARTIFACT_REGISTRY }}gestor-risco-backend/${{ env.IMAGE }}:${{ github.sha }} ${{ env.ARTIFACT_REGISTRY }}gestor-risco-backend/${{ env.IMAGE }}:latest
+        docker push ${{ env.ARTIFACT_REGISTRY }}gestor-risco-backend/${{ env.IMAGE }}:latest
+
+
+    # =============================================================================
+    # STEP 5: DEPLOY (ARQUIVOS SEPARADOS)
+    # =============================================================================
+    - name: Deploy manifests (namespace, backend, frontend, ingress)
+      run: |
+        NAMESPACE="${{ steps.config.outputs.namespace }}"
+        ENVIRONMENT="${{ steps.config.outputs.environment }}"
+
+        echo "🚀 Deploying to $NAMESPACE ($ENVIRONMENT)"
+
+        # Criar namespace e ServiceAccounts
+        kubectl apply -f k8s/gestor-risco-namespace.yaml
+
+        # Identify previous image tags currently deployed (for reference/fallback)
+        BACKEND_DEPLOY_IMAGE=$(kubectl -n "$NAMESPACE" get deploy gestor-risco-backend -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
+        FRONTEND_DEPLOY_IMAGE=$(kubectl -n "$NAMESPACE" get deploy gestor-risco-frontend -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
+        BACKEND_PREV_TAG=${BACKEND_DEPLOY_IMAGE##*:}
+        FRONTEND_PREV_TAG=${FRONTEND_DEPLOY_IMAGE##*:}
+        echo "Previous backend image tag: ${BACKEND_PREV_TAG:-none}"
+        echo "Previous frontend image tag: ${FRONTEND_PREV_TAG:-none}"
+
+        # Decide which tag to deploy: use new SHA when building images; otherwise fallback to previous tag or 'latest'
+        EFFECTIVE_BUILD_FLAG="${BUILD_IMAGES}"
+        if [ "$EFFECTIVE_BUILD_FLAG" = "1" ]; then
+          BACKEND_TAG="${{ github.sha }}"
+          FRONTEND_TAG="${{ github.sha }}"
+        else
+          BACKEND_TAG="${BACKEND_PREV_TAG:-latest}"
+          FRONTEND_TAG="${FRONTEND_PREV_TAG:-latest}"
+        fi
+        echo "Backend tag to deploy: $BACKEND_TAG"
+        echo "Frontend tag to deploy: $FRONTEND_TAG"
+
+        # Backend (substitui variáveis de imagem/registry)
+        sed "s|\${ARTIFACT_REGISTRY}|${{ env.ARTIFACT_REGISTRY }}|g; s|\${IMAGE_TAG}|${BACKEND_TAG}|g" k8s/gestor-risco-backend.yaml > /tmp/backend.yaml
+        kubectl apply -f /tmp/backend.yaml
+
+        # Frontend (substitui variáveis de imagem/registry)
+        sed "s|\${ARTIFACT_REGISTRY}|${{ env.ARTIFACT_REGISTRY }}|g; s|\${IMAGE_TAG}|${FRONTEND_TAG}|g" k8s/gestor-risco-frontend.yaml > /tmp/frontend.yaml
+        kubectl apply -f /tmp/frontend.yaml
+
+        # Ingress e certificados
+        kubectl apply -f k8s/gestor-risco-ingress.yaml
+
+        echo "✅ Manifests applied successfully"
+
+    # =============================================================================
+    # STEP 6: AGUARDAR DEPLOYMENT
+    # =============================================================================
+    - name: Wait for deployments
+      run: |
+        NAMESPACE="${{ steps.config.outputs.namespace }}"
+        
+        echo "⏳ Waiting for backend deployment..."
+        kubectl wait --for=condition=available --timeout=300s deployment/gestor-risco-backend -n "$NAMESPACE" || true
+        
+        echo "⏳ Waiting for frontend deployment..."
+        kubectl wait --for=condition=available --timeout=300s deployment/gestor-risco-frontend -n "$NAMESPACE" || true
+        
+        echo "✅ Deployments are ready"
+
+    # =============================================================================
+    # STEP 7: VERIFICAÇÃO FINAL
+    # =============================================================================
+    - name: Show deployment status
+      run: |
+        NAMESPACE="${{ steps.config.outputs.namespace }}"
+        ENVIRONMENT="${{ steps.config.outputs.environment }}"
+
+        echo "📊 Deployment Status for $ENVIRONMENT environment:"
+        echo "Namespace: $NAMESPACE"
+        echo ""
+
+        echo "🔍 Backend Pods:"
+        kubectl get pods -n $NAMESPACE -l app.kubernetes.io/name=gestor-risco-backend
+
+        echo ""
+        echo "🔍 Frontend Pods:"
+        kubectl get pods -n $NAMESPACE -l app.kubernetes.io/name=gestor-risco-frontend
+
+        echo ""
+        echo "🔍 Services:"
+        kubectl get services -n $NAMESPACE
+
+        echo ""
+        echo "🔍 Ingress:"
+        kubectl get ingress -n $NAMESPACE
+
+        echo ""
+        echo "🔍 ManagedCertificate:"
+        kubectl get managedcertificate -n $NAMESPACE || echo "No managed certificates found"
+
+        echo ""
+        echo "🎉 Deployment completed successfully!"
+        echo ""
+        echo "📝 Useful commands:"
+        echo "  View logs: kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=gestor-risco-backend"
+        echo "  View logs: kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=gestor-risco-frontend"
+        echo "  Port forward: kubectl port-forward service/gestor-risco-backend-service 8000:80 -n $NAMESPACE"
+        echo "  Port forward: kubectl port-forward service/gestor-risco-frontend-service 3000:80 -n $NAMESPACE"
