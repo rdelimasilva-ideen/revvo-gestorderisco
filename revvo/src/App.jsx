@@ -31,6 +31,7 @@ import UserProfiles from './components/UserProfiles/UserProfiles';
 import HistoricoLimites from './components/HistoricoLimites/HistoricoLimites';
 import AlertasExternos from './components/AlertasExternos/AlertasExternos';
 import ScoreComportamental from './components/ScoreComportamental/ScoreComportamental';
+import MotorDeRegras from './components/MotorDeRegras/MotorDeRegras';
 // import SapSalesOrders from './components/Sap/SapSalesOrders';
 // import SapInvoices from './components/Sap/SapInvoices';
 import { CustomerService } from './services/customerService';
@@ -553,6 +554,8 @@ function App() {
         <CreditLimitPolicies />
       ) : currentPage === 'analise' ? (
         <BusinessAnalysis />
+      ) : currentPage === 'motor-regras' ? (
+        <MotorDeRegras />
       ) : currentPage === 'profile' ? (
         <UserProfile onClose={() => setCurrentPage('sales')} />
       ) : currentPage === 'profiles' ? (

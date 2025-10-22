@@ -4,7 +4,7 @@ import {
   House, List, CurrencyDollar, ShoppingCart, Gear, ChartLine,
   CaretDown, Question, Bell, User,
   Envelope, SignOut, Clock, Package,
-  SignOutIcon
+  SignOutIcon, Sliders
 } from '@phosphor-icons/react';
 import { Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -164,6 +164,13 @@ const Sidebar = ({
           >
             <Eye size={16} weight="regular" />
             Análise do Cliente
+          </li>
+          <li
+            className={currentPage === 'motor-regras' ? 'active' : ''}
+            onClick={() => setCurrentPage('motor-regras')}
+          >
+            <Sliders size={16} weight="regular" />
+            Motor de regras
           </li>
           <li
             className={currentPage === 'historico-limites' ? 'active' : ''}
