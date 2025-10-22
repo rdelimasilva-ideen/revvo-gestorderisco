@@ -80,6 +80,204 @@ const MotorDeRegras = () => {
       ],
       ultima_execucao: '2024-09-15 16:20',
       execucoes: 8
+    },
+    {
+      id: 5,
+      nome: 'Aprovação Rápida Clientes Premium',
+      descricao: 'Aprovação automática para clientes com histórico excelente',
+      tipo: 'Workflow',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Score', operador: '>=', valor: '900' },
+        { campo: 'Tempo de Relacionamento', operador: '>', valor: '24 meses' },
+        { campo: 'Inadimplência Histórica', operador: '=', valor: '0' }
+      ],
+      acoes: [
+        { tipo: 'Aprovação', valor: 'Automática' },
+        { tipo: 'Prioridade', valor: 'Alta' },
+        { tipo: 'Benefício', valor: 'Taxa reduzida 5%' }
+      ],
+      ultima_execucao: '2024-10-22 10:20',
+      execucoes: 89
+    },
+    {
+      id: 6,
+      nome: 'Alerta de Concentração de Risco',
+      descricao: 'Notifica quando um cliente atinge 80% do limite disponível',
+      tipo: 'Alerta',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Utilização do Limite', operador: '>=', valor: '80%' }
+      ],
+      acoes: [
+        { tipo: 'Enviar Email', valor: 'Analista de Crédito' },
+        { tipo: 'Criar Tarefa', valor: 'Revisar limite' },
+        { tipo: 'Dashboard', valor: 'Destacar cliente' }
+      ],
+      ultima_execucao: '2024-10-22 08:45',
+      execucoes: 34
+    },
+    {
+      id: 7,
+      nome: 'Bloqueio por Protesto',
+      descricao: 'Bloqueia automaticamente vendas para clientes com protestos',
+      tipo: 'Crédito',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Protestos Ativos', operador: '>', valor: '0' },
+        { campo: 'Valor Total Protestos', operador: '>', valor: '5000' }
+      ],
+      acoes: [
+        { tipo: 'Bloquear Pedidos', valor: 'Sim' },
+        { tipo: 'Definir Limite', valor: 'R$ 0' },
+        { tipo: 'Notificar', valor: 'Gerente de Risco' }
+      ],
+      ultima_execucao: '2024-10-21 15:30',
+      execucoes: 12
+    },
+    {
+      id: 8,
+      nome: 'Workflow Primeira Compra',
+      descricao: 'Encaminha para aprovação manual a primeira compra de novos clientes',
+      tipo: 'Workflow',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Total de Pedidos', operador: '=', valor: '0' },
+        { campo: 'Cadastro Completo', operador: '=', valor: 'Sim' }
+      ],
+      acoes: [
+        { tipo: 'Encaminhar para', valor: 'Analista de Crédito Senior' },
+        { tipo: 'Solicitar', valor: 'Análise de documentos' },
+        { tipo: 'Prazo SLA', valor: '48 horas' }
+      ],
+      ultima_execucao: '2024-10-22 09:00',
+      execucoes: 28
+    },
+    {
+      id: 9,
+      nome: 'Aumento Automático de Limite',
+      descricao: 'Aumenta limite para clientes com bom histórico de pagamento',
+      tipo: 'Crédito',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Score', operador: '>=', valor: '750' },
+        { campo: 'Pagamentos em Dia', operador: '>=', valor: '95%' },
+        { campo: 'Tempo de Relacionamento', operador: '>', valor: '12 meses' }
+      ],
+      acoes: [
+        { tipo: 'Aumentar Limite', valor: '20%' },
+        { tipo: 'Enviar Email', valor: 'Cliente' },
+        { tipo: 'Registrar', valor: 'Histórico de limite' }
+      ],
+      ultima_execucao: '2024-10-20 18:00',
+      execucoes: 56
+    },
+    {
+      id: 10,
+      nome: 'Alerta Vencimento Próximo',
+      descricao: 'Notifica cliente sobre títulos próximos ao vencimento',
+      tipo: 'Alerta',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Dias até Vencimento', operador: '<=', valor: '5' },
+        { campo: 'Valor do Título', operador: '>', valor: '1000' }
+      ],
+      acoes: [
+        { tipo: 'Enviar Email', valor: 'Cliente' },
+        { tipo: 'Enviar SMS', valor: 'Financeiro do Cliente' },
+        { tipo: 'Criar Lembrete', valor: 'Equipe de Cobrança' }
+      ],
+      ultima_execucao: '2024-10-22 07:00',
+      execucoes: 156
+    },
+    {
+      id: 11,
+      nome: 'Revisão Trimestral de Limites',
+      descricao: 'Agenda revisão automática de limites a cada 3 meses',
+      tipo: 'Workflow',
+      status: 'inativa',
+      condicoes: [
+        { campo: 'Última Revisão', operador: '>', valor: '90 dias' },
+        { campo: 'Limite Ativo', operador: '>', valor: 'R$ 0' }
+      ],
+      acoes: [
+        { tipo: 'Criar Tarefa', valor: 'Analista de Crédito' },
+        { tipo: 'Gerar Relatório', valor: 'Comportamento do cliente' },
+        { tipo: 'Agendar', valor: 'Reunião de análise' }
+      ],
+      ultima_execucao: '2024-07-15 10:00',
+      execucoes: 203
+    },
+    {
+      id: 12,
+      nome: 'Desconto por Antecipação',
+      descricao: 'Oferece desconto automático para pagamento antecipado',
+      tipo: 'Crédito',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Dias de Antecipação', operador: '>=', valor: '10' },
+        { campo: 'Valor da Fatura', operador: '>', valor: '20000' }
+      ],
+      acoes: [
+        { tipo: 'Aplicar Desconto', valor: '2%' },
+        { tipo: 'Enviar Oferta', valor: 'Cliente' },
+        { tipo: 'Registrar', valor: 'Incentivo aplicado' }
+      ],
+      ultima_execucao: '2024-10-21 16:45',
+      execucoes: 42
+    },
+    {
+      id: 13,
+      nome: 'Escalonamento de Inadimplência',
+      descricao: 'Escala notificações conforme dias de atraso aumentam',
+      tipo: 'Alerta',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Dias de Atraso', operador: 'IN', valor: '[15, 30, 60, 90]' }
+      ],
+      acoes: [
+        { tipo: 'Email 15 dias', valor: 'Lembrete amigável' },
+        { tipo: 'Email 30 dias', valor: 'Aviso formal' },
+        { tipo: 'Email 60 dias', valor: 'Última notificação' },
+        { tipo: 'Email 90 dias', valor: 'Encaminhar jurídico' }
+      ],
+      ultima_execucao: '2024-10-22 06:00',
+      execucoes: 78
+    },
+    {
+      id: 14,
+      nome: 'Validação de Dados Cadastrais',
+      descricao: 'Valida atualização de dados cadastrais periodicamente',
+      tipo: 'Workflow',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Última Atualização Cadastral', operador: '>', valor: '365 dias' }
+      ],
+      acoes: [
+        { tipo: 'Enviar Formulário', valor: 'Cliente' },
+        { tipo: 'Criar Tarefa', valor: 'Relacionamento' },
+        { tipo: 'Marcar', valor: 'Pendente atualização' }
+      ],
+      ultima_execucao: '2024-10-20 12:00',
+      execucoes: 91
+    },
+    {
+      id: 15,
+      nome: 'Alerta de Negativação Externa',
+      descricao: 'Monitora negativações em bureaus de crédito',
+      tipo: 'Alerta',
+      status: 'ativa',
+      condicoes: [
+        { campo: 'Serasa/SPC', operador: '!=', valor: 'Limpo' },
+        { campo: 'Data da Consulta', operador: '=', valor: 'Hoje' }
+      ],
+      acoes: [
+        { tipo: 'Notificar', valor: 'Gestor de Risco' },
+        { tipo: 'Suspender', valor: 'Novos pedidos' },
+        { tipo: 'Agendar', valor: 'Reavaliação de crédito' }
+      ],
+      ultima_execucao: '2024-10-22 05:00',
+      execucoes: 15
     }
   ];
 
