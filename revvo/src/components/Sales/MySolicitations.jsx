@@ -117,6 +117,226 @@ const mockRequests = [
     status_id: 2,
     status: { name: 'Em Análise' },
     created_at: '2024-10-17T12:30:00'
+  },
+  {
+    id: 11,
+    customer: {
+      company_code: '011',
+      name: 'Farmácia e Drogaria São José'
+    },
+    credit_limit_amt: 200000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-22T09:00:00'
+  },
+  {
+    id: 12,
+    customer: {
+      company_code: '012',
+      name: 'Clínica de Fisioterapia Movimento'
+    },
+    credit_limit_amt: 180000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-10-03T14:15:00'
+  },
+  {
+    id: 13,
+    customer: {
+      company_code: '013',
+      name: 'Centro Médico Avançado'
+    },
+    credit_limit_amt: 450000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-16T11:20:00'
+  },
+  {
+    id: 14,
+    customer: {
+      company_code: '014',
+      name: 'Hospital Regional Norte'
+    },
+    credit_limit_amt: 800000,
+    status_id: 4,
+    status: { name: 'Rejeitado' },
+    created_at: '2024-10-09T16:45:00'
+  },
+  {
+    id: 15,
+    customer: {
+      company_code: '015',
+      name: 'Clínica Especializada Sul'
+    },
+    credit_limit_amt: 350000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-21T10:00:00'
+  },
+  {
+    id: 16,
+    customer: {
+      company_code: '016',
+      name: 'Laboratório LabMais'
+    },
+    credit_limit_amt: 280000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-14T13:30:00'
+  },
+  {
+    id: 17,
+    customer: {
+      company_code: '017',
+      name: 'Clínica Cardiológica Coração Forte'
+    },
+    credit_limit_amt: 520000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-10-02T08:20:00'
+  },
+  {
+    id: 18,
+    customer: {
+      company_code: '018',
+      name: 'Hospital Veterinário PetCare'
+    },
+    credit_limit_amt: 120000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-20T15:40:00'
+  },
+  {
+    id: 19,
+    customer: {
+      company_code: '019',
+      name: 'Centro de Tratamento Intensivo'
+    },
+    credit_limit_amt: 950000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-11T12:00:00'
+  },
+  {
+    id: 20,
+    customer: {
+      company_code: '020',
+      name: 'Farmácia Medicamentos Especiais'
+    },
+    credit_limit_amt: 220000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-09-28T10:30:00'
+  },
+  {
+    id: 21,
+    customer: {
+      company_code: '021',
+      name: 'Clínica de Estética Beleza Total'
+    },
+    credit_limit_amt: 160000,
+    status_id: 4,
+    status: { name: 'Rejeitado' },
+    created_at: '2024-10-07T14:50:00'
+  },
+  {
+    id: 22,
+    customer: {
+      company_code: '022',
+      name: 'Laboratório Análises Rápidas'
+    },
+    credit_limit_amt: 380000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-19T09:25:00'
+  },
+  {
+    id: 23,
+    customer: {
+      company_code: '023',
+      name: 'Consultório Odontológico Dental Saúde'
+    },
+    credit_limit_amt: 140000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-13T16:10:00'
+  },
+  {
+    id: 24,
+    customer: {
+      company_code: '024',
+      name: 'Centro Radiológico Imagem Perfeita'
+    },
+    credit_limit_amt: 420000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-09-30T11:45:00'
+  },
+  {
+    id: 25,
+    customer: {
+      company_code: '025',
+      name: 'Clínica Neurológica NeuroCare'
+    },
+    credit_limit_amt: 480000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-18T08:00:00'
+  },
+  {
+    id: 26,
+    customer: {
+      company_code: '026',
+      name: 'Hospital Dia Cirurgia Rápida'
+    },
+    credit_limit_amt: 650000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-15T13:15:00'
+  },
+  {
+    id: 27,
+    customer: {
+      company_code: '027',
+      name: 'Farmácia de Manipulação Fórmula Certa'
+    },
+    credit_limit_amt: 190000,
+    status_id: 3,
+    status: { name: 'Aprovado' },
+    created_at: '2024-09-25T15:20:00'
+  },
+  {
+    id: 28,
+    customer: {
+      company_code: '028',
+      name: 'Clínica Pediátrica Infância Feliz'
+    },
+    credit_limit_amt: 320000,
+    status_id: 4,
+    status: { name: 'Rejeitado' },
+    created_at: '2024-10-06T10:35:00'
+  },
+  {
+    id: 29,
+    customer: {
+      company_code: '029',
+      name: 'Hospital Psiquiátrico Mente Sã'
+    },
+    credit_limit_amt: 720000,
+    status_id: 1,
+    status: { name: 'Pendente' },
+    created_at: '2024-10-22T11:50:00'
+  },
+  {
+    id: 30,
+    customer: {
+      company_code: '030',
+      name: 'Centro de Diagnóstico por Imagem'
+    },
+    credit_limit_amt: 410000,
+    status_id: 2,
+    status: { name: 'Em Análise' },
+    created_at: '2024-10-12T09:40:00'
   }
 ];
 
