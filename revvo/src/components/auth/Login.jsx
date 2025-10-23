@@ -96,31 +96,32 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const data = await login({
+      // Login mock - aceita qualquer credencial para demonstração
+      // Credenciais sugeridas: admin@ideen.tech / admin
+      const mockUser = {
+        id: '1',
         email: formData.email,
-        password: formData.password,
-      });
-      
-      console.log('Login successful, data:', data);
-
-      // Armazenar dados na sessão
-      if (data && data.access_token) {
-        try {
-          // Definir a sessão usando nossa própria função
-          const { data: sessionData } = await setSession({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token
-          });
-          
-          console.log('Session updated:', sessionData);
-        } catch (sessionError) {
-          console.error('Error setting session:', sessionError);
-          // Continuar mesmo com erro de sessão, pois os tokens já foram armazenados
+        user_metadata: {
+          name: 'Usuário Demo'
         }
-      }
+      };
 
-      // Temporariamente removido para evitar requisições duplicadas
-      // await getSapToken(); 
+      const mockTokens = {
+        access_token: 'mock_access_token_' + Date.now(),
+        refresh_token: 'mock_refresh_token_' + Date.now()
+      };
+
+      // Simular delay de autenticação
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Armazenar dados na sessão (localStorage para modo mock)
+      localStorage.setItem('access_token', mockTokens.access_token);
+      localStorage.setItem('refresh_token', mockTokens.refresh_token);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      localStorage.setItem('session', JSON.stringify({
+        user: mockUser,
+        access_token: mockTokens.access_token
+      }));
 
       if (rememberMe) {
         localStorage.setItem('rememberMe', 'true');
@@ -128,18 +129,14 @@ const Login = () => {
         localStorage.removeItem('rememberMe');
       }
 
-      if (data?.user?.user_metadata?.must_change_password) {
-        console.log('User needs to change password, redirecting to /change-password');
-        navigate('/change-password');
-        return;
-      }
-
+      console.log('Mock login successful');
       console.log('Redirecting to home page...');
+
       // Forçar redirecionamento usando window.location para garantir uma navegação completa
       window.location.href = '/';
     } catch (error) {
       console.log('Error logging in:', error.message);
-      setError(translateErrorMessage(error.message));
+      setError('Erro ao fazer login. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
