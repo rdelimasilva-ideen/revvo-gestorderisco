@@ -43,15 +43,13 @@ const Login = () => {
     let valid = true;
     const newErrors = { email: '', password: '' };
 
-    if (!formData.email) {
+    // Validação simplificada para modo demo
+    if (!formData.email || formData.email.trim() === '') {
       newErrors.email = 'Email é obrigatório';
-      valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
       valid = false;
     }
 
-    if (!formData.password) {
+    if (!formData.password || formData.password.trim() === '') {
       newErrors.password = 'Senha é obrigatória';
       valid = false;
     }
