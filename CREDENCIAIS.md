@@ -6,22 +6,27 @@ O sistema agora funciona em **modo demonstração** com autenticação mock.
 
 ### Qualquer credencial funciona! ✅
 
-Para acessar o sistema, você pode usar **QUALQUER** email e senha válidos.
+Para acessar o sistema, você pode usar **QUALQUER** usuário e senha.
 
-### Credenciais Sugeridas:
+### Credenciais Sugeridas (super simples):
 
-**Usuário:** `admin@ideen.tech`
+**Usuário:** `admin`
 **Senha:** `admin`
 
 ou
 
-**Usuário:** `demo@revvo.com`
-**Senha:** `123456`
+**Usuário:** `demo`
+**Senha:** `123`
 
 ou
 
-**Usuário:** `teste@teste.com`
-**Senha:** `senha123`
+**Usuário:** `teste`
+**Senha:** `teste`
+
+### Também funciona com email:
+
+**Usuário:** `admin@ideen.tech`
+**Senha:** `admin`
 
 ---
 
@@ -34,8 +39,8 @@ ou
 - Perfeito para **demonstração** e **testes**
 
 ### 🎯 Validações Mínimas:
-- Email precisa ter formato válido (ex: `usuario@dominio.com`)
-- Senha precisa ter pelo menos 1 caractere
+- Usuário: qualquer texto não vazio (pode ser "admin", "demo", ou um email)
+- Senha: qualquer texto não vazio
 
 ### 🚀 Após o Login:
 Você terá acesso completo a todas as funcionalidades:
